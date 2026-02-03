@@ -1,6 +1,5 @@
 ﻿using HospitalSystem.Data;
 using HospitalSystem.DTOs.Doctor;
-using HospitalSystem.Domain.Entities;
 using HospitalSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,4 +26,21 @@ public class DoctorService : IDoctorService
             })
             .ToListAsync();
     }
+    
+    public async Task UpdateProfileAsync(int userId, UpdateDoctorDto dto)
+    {
+        var doctor = await _context.Doctors
+            .Include(d => d.User)
+            .FirstOrDefaultAsync(d => d.UserId == userId);
+
+        if (doctor == null)
+            throw new Exception("Doctor not found");
+
+        doctor.FirstName = dto.FirstName;
+        doctor.LastName = dto.LastName;
+        doctor.Specialization = dto.Specialization;
+
+        await _context.SaveChangesAsync();
+    }
+
 }

@@ -48,8 +48,7 @@ public class PatientService : IPatientService
             Phone = patient.Phone
         };
     }
-
-    // ✅ Получить профиль текущего пользователя
+    
     public async Task<PatientDto?> GetProfileAsync(int userId)
     {
         var patient = await _context.Patients
@@ -88,7 +87,6 @@ public class PatientService : IPatientService
         return new PatientDto
         {
             Id = patient.Id,
-            Email = patient.User.Email,
             FirstName = patient.FirstName,
             LastName = patient.LastName,
             DateOfBirth = patient.DateOfBirth,

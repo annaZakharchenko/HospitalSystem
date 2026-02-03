@@ -18,6 +18,7 @@ public class PatientController : ControllerBase
         _patientService = patientService;
     }
 
+    [Authorize(Policy = "MedicalStaff")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
