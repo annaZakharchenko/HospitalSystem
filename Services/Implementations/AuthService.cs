@@ -22,24 +22,6 @@ public class AuthService : IAuthService
         _context = context;
         _config = config;
     }
-
-    // public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
-    // {
-    //     if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
-    //         throw new Exception("User already exists");
-    //
-    //     var user = new User
-    //     {
-    //         Email = dto.Email,
-    //         PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-    //         Role = dto.Role
-    //     };
-    //
-    //     _context.Users.Add(user);
-    //     await _context.SaveChangesAsync();
-    //
-    //     return GenerateAuthResponse(user);
-    // }
   
     public async Task<AuthResponseDto> RegisterPatientAsync(RegisterPatientDto dto)
     {
@@ -56,19 +38,24 @@ public class AuthService : IAuthService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // 🔹 создаём пациента
         var patient = new Patient
         {
             UserId = user.Id,
             FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            DateOfBirth = dto.DateOfBirth,
-            Phone = dto.Phone
+            LastName = dto.LastName
         };
 
         _context.Patients.Add(patient);
         await _context.SaveChangesAsync();
 
+        var medicalRecord = new MedicalRecord
+        {
+            PatientId = patient.Id
+        };
+
+        _context.MedicalRecords.Add(medicalRecord);
+        await _context.SaveChangesAsync();
+        
         return GenerateAuthResponse(user);
     }
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)

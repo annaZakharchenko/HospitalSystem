@@ -25,7 +25,6 @@ public class LabTestController : ControllerBase
         return Ok(result);
     }
 
-    // Лаборант добавляет результат
     [HttpPost("result")]
     public async Task<IActionResult> AddResult(AddLabTestResultDto dto)
     {
@@ -33,7 +32,6 @@ public class LabTestController : ControllerBase
         return Ok(result);
     }
 
-    // Получить тесты пациента
     [HttpGet("patient/{patientId}")]
     public async Task<IActionResult> GetByPatient(int patientId)
     {
@@ -41,7 +39,6 @@ public class LabTestController : ControllerBase
         return Ok(tests);
     }
 
-    // Поиск по имени пациента
     [HttpGet("search")]
     public async Task<IActionResult> SearchByPatientName([FromQuery] string name)
     {
@@ -49,7 +46,6 @@ public class LabTestController : ControllerBase
         return Ok(tests);
     }
 
-    // Получить один тест
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

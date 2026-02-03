@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using HospitalSystem.Data;
 using HospitalSystem.Services.Implementations;
 using HospitalSystem.Services.Interfaces;
@@ -12,35 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<HospitalDbContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection")!));
 
-builder.Services.AddControllers();
-// builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddSwaggerGen(options =>
-// {
-//     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-//     {
-//         Name = "Authorization",
-//         Type = SecuritySchemeType.Http,
-//         Scheme = "Bearer",
-//         BearerFormat = "JWT",
-//         In = ParameterLocation.Header,
-//         Description = "Введите токен в формате: Bearer {your JWT token}"
-//     });
-//
-//     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-//     {
-//         {
-//             new OpenApiSecurityScheme
-//             {
-//                 Reference = new Microsoft.OpenApi.Models.OpenApiReference
-//                 {
-//                     Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-//                     Id = "Bearer"
-//                 }
-//             },
-//             new string[] {}
-//         }
-//     });
-// });
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
@@ -59,7 +36,6 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-//builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
@@ -71,11 +47,11 @@ builder.Services.AddScoped<IMedicalRecordService, MedicalRecordService>();
 
 var app = builder.Build();
 
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<HospitalDbContext>();
+    await DbInitializer.SeedAdminAsync(context);
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

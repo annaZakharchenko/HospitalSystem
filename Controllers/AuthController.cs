@@ -16,12 +16,6 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    // [HttpPost("register")]
-    // public async Task<ActionResult<AuthResponseDto>> Register(RegisterDto dto)
-    // {
-    //     return Ok(await _authService.RegisterAsync(dto));
-    // }
-
     [HttpPost("register")]
     public async Task<IActionResult> RegisterPatient(RegisterPatientDto dto)
     {

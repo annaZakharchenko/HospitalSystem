@@ -99,27 +99,22 @@ public class LabTestService : ILabTestService
         return tests.Select(MapToDto);
     }
 
-    // ✅ Используем FirstName + LastName из сущностей
     private LabTestDto MapToDto(LabTest test)
     {
         return new LabTestDto
         {
             Id = test.Id,
             
-            // Пациент
             PatientId = test.PatientId,
             PatientFullName = $"{test.MedicalRecord.Patient.FirstName} {test.MedicalRecord.Patient.LastName}",
             
-            // Доктор
             DoctorId = test.DoctorId,
             DoctorFullName = $"{test.Doctor.FirstName} {test.Doctor.LastName}",
             
-            // Основная информация
             TestType = test.TestType,
             Status = test.Status,
             CreatedAt = test.CreatedAt,
             
-            // Результат (если есть)
             LabTechnicianId = test.Result?.LabTechnicianId,
             LabTechnicianFullName = test.Result != null 
                 ? $"{test.Result.LabTechnician.FirstName} {test.Result.LabTechnician.LastName}"

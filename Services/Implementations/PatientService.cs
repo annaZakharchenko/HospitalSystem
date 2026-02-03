@@ -1,8 +1,5 @@
 ﻿using HospitalSystem.Data;
-using HospitalSystem.Domain.Entities;
 using HospitalSystem.DTOs.Patient;
-using HospitalSystem.Domain.Entities;
-using HospitalSystem.Domain.Enums;
 using HospitalSystem.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,68 +14,85 @@ public class PatientService : IPatientService
         _context = context;
     }
 
-    public async Task<PatientDto> CreateAsync(CreatePatientDto dto)
-    {
-        var user = new User
-        {
-            Email = dto.Email,
-            PasswordHash = "TEMP_HASH", // потом будет auth
-            Role = UserRole.Patient
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        var patient = new Patient
-        {
-            UserId = user.Id,
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            DateOfBirth = dto.DateOfBirth,
-            Phone = dto.Phone
-        };
-
-        _context.Patients.Add(patient);
-        await _context.SaveChangesAsync();
-
-        _context.MedicalRecords.Add(new MedicalRecord
-        {
-            PatientId = patient.Id
-        });
-
-        await _context.SaveChangesAsync();
-
-        return new PatientDto
-        {
-            Id = patient.Id,
-            FullName = $"{patient.FirstName} {patient.LastName}",
-            Email = user.Email
-        };
-    }
-
-
     public async Task<IEnumerable<PatientDto>> GetAllAsync()
     {
         return await _context.Patients
+            .Include(p => p.User)
             .Select(p => new PatientDto
             {
                 Id = p.Id,
-                FullName = p.FirstName + " " + p.LastName,
-                Email = p.User.Email
+                FirstName = p.FirstName,
+                LastName = p.LastName,
+                Email = p.User.Email,
+                DateOfBirth = p.DateOfBirth,
+                Phone = p.Phone
             })
             .ToListAsync();
     }
 
     public async Task<PatientDto?> GetByIdAsync(int id)
     {
-        var patient = await _context.Patients.FindAsync(id);
+        var patient = await _context.Patients
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.Id == id);
+            
         if (patient == null) return null;
 
         return new PatientDto
         {
             Id = patient.Id,
-            FullName = patient.FirstName + " " + patient.LastName,
-            Email = patient.User.Email
+            FirstName = patient.FirstName,
+            LastName = patient.LastName,
+            Email = patient.User.Email,
+            DateOfBirth = patient.DateOfBirth,
+            Phone = patient.Phone
+        };
+    }
+
+    // ✅ Получить профиль текущего пользователя
+    public async Task<PatientDto?> GetProfileAsync(int userId)
+    {
+        var patient = await _context.Patients
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+            
+        if (patient == null) return null;
+
+        return new PatientDto
+        {
+            Id = patient.Id,
+            Email = patient.User.Email,
+            FirstName = patient.FirstName,
+            LastName = patient.LastName,
+            DateOfBirth = patient.DateOfBirth,
+            Phone = patient.Phone
+        };
+    }
+
+    public async Task<PatientDto> UpdateProfileAsync(int userId, UpdatePatientDto dto)
+    {
+        var patient = await _context.Patients
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+
+        if (patient == null)
+            throw new Exception("Patient not found");
+
+        patient.FirstName = dto.FirstName;
+        patient.LastName = dto.LastName;
+        patient.DateOfBirth = dto.DateOfBirth;
+        patient.Phone = dto.Phone;
+
+        await _context.SaveChangesAsync();
+
+        return new PatientDto
+        {
+            Id = patient.Id,
+            Email = patient.User.Email,
+            FirstName = patient.FirstName,
+            LastName = patient.LastName,
+            DateOfBirth = patient.DateOfBirth,
+            Phone = patient.Phone
         };
     }
 }
