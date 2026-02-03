@@ -4,6 +4,5 @@ namespace HospitalSystem.Services.Interfaces;
 
 public interface IDoctorService
 {
-    Task<DoctorDto> CreateAsync(CreateDoctorDto dto);
     Task<IEnumerable<DoctorDto>> GetAllAsync();
 }

@@ -14,26 +14,7 @@ public class DoctorService : IDoctorService
     {
         _context = context;
     }
-
-    public async Task<DoctorDto> CreateAsync(CreateDoctorDto dto)
-    {
-        var doctor = new Doctor
-        {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            Specialization = dto.Specialization
-        };
-
-        _context.Doctors.Add(doctor);
-        await _context.SaveChangesAsync();
-
-        return new DoctorDto
-        {
-            Id = doctor.Id,
-            FullName = $"{doctor.FirstName} {doctor.LastName}",
-            Specialization = doctor.Specialization
-        };
-    }
+    
 
     public async Task<IEnumerable<DoctorDto>> GetAllAsync()
     {
