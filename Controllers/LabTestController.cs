@@ -1,4 +1,5 @@
-﻿using HospitalSystem.DTOs.LabTest;
+﻿using System.Security.Claims;
+using HospitalSystem.DTOs.LabTest;
 using HospitalSystem.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,26 +18,30 @@ public class LabTestController : ControllerBase
         _labTestService = labTestService;
     }
 
-    // Доктор создаёт тест
+    [Authorize(Roles = "Doctor")]
     [HttpPost]
-    public async Task<IActionResult> CreateLabTest(CreateLabTestDto dto)
+    public async Task<IActionResult> Create(CreateLabTestDto dto)
     {
-        var result = await _labTestService.CreateAsync(dto);
-        return Ok(result);
+        var doctorId = int.Parse(User.FindFirstValue("sub")!);
+        dto.DoctorId = doctorId;
+
+        return Ok(await _labTestService.CreateAsync(dto));
     }
 
-    [HttpPost("result")]
-    public async Task<IActionResult> AddResult(AddLabTestResultDto dto)
+    [Authorize(Roles = "LabTechnician")]
+    [HttpPut("{id}/result")]
+    public async Task<IActionResult> AddResult(int id, AddLabTestResultDto dto)
     {
-        var result = await _labTestService.AddResultAsync(dto);
-        return Ok(result);
+        dto.LabTestId = id;
+        return Ok(await _labTestService.AddResultAsync(dto));
     }
 
-    [HttpGet("patient/{patientId}")]
-    public async Task<IActionResult> GetByPatient(int patientId)
+    [Authorize(Roles = "Patient")]
+    [HttpGet("patient")]
+    public async Task<IActionResult> GetByPatientId()
     {
-        var tests = await _labTestService.GetByPatientIdAsync(patientId);
-        return Ok(tests);
+        var patientId = int.Parse(User.FindFirstValue("sub")!);
+        return Ok(await _labTestService.GetByPatientIdAsync(patientId));
     }
 
     [HttpGet("search")]
@@ -46,10 +51,8 @@ public class LabTestController : ControllerBase
         return Ok(tests);
     }
 
+    [Authorize(Roles = "Doctor,Admin")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
-    {
-        var test = await _labTestService.GetByIdAsync(id);
-        return Ok(test);
-    }
+        => Ok(await _labTestService.GetByIdAsync(id));
 }

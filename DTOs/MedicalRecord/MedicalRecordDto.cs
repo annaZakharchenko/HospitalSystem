@@ -5,5 +5,5 @@ public class MedicalRecordDto
     public int Id { get; set; }
     public int PatientId { get; set; }
     public DateTime Date { get; set; }
-    public List<MedicalRecordEntryDto> Entries { get; set; } = new();
+    public List<CreateMedicalRecordEntryDto> Entries { get; set; } = new();
 }
