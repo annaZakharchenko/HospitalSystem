@@ -23,9 +23,23 @@ public class DoctorController : ControllerBase
         var doctors = await _doctorService.GetAllAsync();
         return Ok(doctors);
     }
-
+    [HttpGet("profile")]
     [Authorize(Roles = "Doctor")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                               ?? User.FindFirst("sub")?.Value 
+                               ?? throw new Exception("User ID not found in token"));
+
+        var profile = await _doctorService.GetProfileAsync(userId);
+        if (profile == null)
+            return NotFound();
+
+        return Ok(profile);
+    }
+
     [HttpPut("profile")]
+    [Authorize(Roles = "Doctor")]
     public async Task<IActionResult> UpdateProfile(UpdateDoctorDto dto)
     {
         var userId = int.Parse(
@@ -34,7 +48,7 @@ public class DoctorController : ControllerBase
             ?? throw new Exception("User ID not found in token")
         );
 
-        await _doctorService.UpdateProfileAsync(userId, dto);
-        return Ok();
+        var profile = await _doctorService.UpdateProfileAsync(userId, dto);
+        return Ok(profile);
     }
 }

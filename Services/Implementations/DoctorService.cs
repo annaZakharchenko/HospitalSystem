@@ -21,13 +21,32 @@ public class DoctorService : IDoctorService
             .Select(d => new DoctorDto
             {
                 Id = d.Id,
-                FullName = d.FirstName + " " + d.LastName,
+                FirstName =  d.FirstName,
+                LastName =  d.LastName,
                 Specialization = d.Specialization
             })
             .ToListAsync();
     }
     
-    public async Task UpdateProfileAsync(int userId, UpdateDoctorDto dto)
+    public async Task<DoctorDto?> GetProfileAsync(int userId)
+    {
+        var doctor = await _context.Doctors
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+            
+        if (doctor == null) return null;
+
+        return new DoctorDto
+        {
+            Id = doctor.Id,
+            Email = doctor.User.Email,
+            FirstName =  doctor.FirstName,
+            LastName =  doctor.LastName,
+            Specialization = doctor.Specialization
+        };
+    }
+    
+    public async Task<DoctorDto> UpdateProfileAsync(int userId, UpdateDoctorDto dto)
     {
         var doctor = await _context.Doctors
             .Include(d => d.User)
@@ -41,6 +60,15 @@ public class DoctorService : IDoctorService
         doctor.Specialization = dto.Specialization;
 
         await _context.SaveChangesAsync();
+        
+        return new DoctorDto()
+        {
+            Id = doctor.Id,
+            FirstName = doctor.FirstName,
+            LastName = doctor.LastName,
+            Email = doctor.User.Email,
+            Specialization = doctor.Specialization
+        };
     }
 
 }
