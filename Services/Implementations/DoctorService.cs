@@ -61,7 +61,7 @@ public class DoctorService : IDoctorService
 
         await _context.SaveChangesAsync();
         
-        return new DoctorDto()
+        return new DoctorDto
         {
             Id = doctor.Id,
             FirstName = doctor.FirstName,

@@ -5,6 +5,8 @@ namespace HospitalSystem.Services.Interfaces;
 public interface ILabTechnician
 {
     Task<IEnumerable<LabTechnicianDto>> GetAllAsync();
-    Task UpdateProfileAsync(int userId, UpdateLabTechnicianDto dto);
+    Task<LabTechnicianDto?> GetProfileAsync(int userId);  
+
+    Task<LabTechnicianDto> UpdateProfileAsync(int userId, UpdateLabTechnicianDto dto);
 
 }

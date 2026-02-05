@@ -16,9 +16,24 @@ public class LabTechnicianController : ControllerBase
     {
         _labtechnician = labtechnician;
     }
-
+    
+    [HttpGet("profile")]
     [Authorize(Roles = "LabTechnician")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                               ?? User.FindFirst("sub")?.Value 
+                               ?? throw new Exception("User ID not found in token"));
+
+        var profile = await _labtechnician.GetProfileAsync(userId);
+        if (profile == null)
+            return NotFound();
+
+        return Ok(profile);
+    }
+
     [HttpPut("profile")]
+    [Authorize(Roles = "LabTechnician")]
     public async Task<IActionResult> UpdateProfile(UpdateLabTechnicianDto dto)
     {
         var userId = int.Parse(
@@ -27,7 +42,7 @@ public class LabTechnicianController : ControllerBase
             ?? throw new Exception("User ID not found")
         );
 
-        await _labtechnician.UpdateProfileAsync(userId, dto);
-        return Ok();
+        var profile= await _labtechnician.UpdateProfileAsync(userId, dto);
+        return Ok(profile);
     }
 }

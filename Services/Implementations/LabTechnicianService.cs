@@ -26,9 +26,27 @@ public class LabTechnicianService : ILabTechnician
             .ToListAsync();
     }
 
-    public async Task UpdateProfileAsync(int userId, UpdateLabTechnicianDto dto)
+    public async Task<LabTechnicianDto?> GetProfileAsync(int userId)
     {
         var lab = await _context.LabTechnicians
+            .Include(p => p.User)
+            .FirstOrDefaultAsync(p => p.UserId == userId);
+            
+        if (lab == null) return null;
+
+        return new LabTechnicianDto()
+        {
+            Id = lab.Id,
+            Email = lab.User.Email,
+            FirstName = lab.FirstName,
+            LastName = lab.LastName
+        };
+    }
+    
+    public async Task<LabTechnicianDto> UpdateProfileAsync(int userId, UpdateLabTechnicianDto dto)
+    {
+        var lab = await _context.LabTechnicians
+            .Include(l => l.User)
             .FirstOrDefaultAsync(l => l.UserId == userId);
 
         if (lab == null)
@@ -38,5 +56,13 @@ public class LabTechnicianService : ILabTechnician
         lab.LastName = dto.LastName;
 
         await _context.SaveChangesAsync();
+        
+        return new LabTechnicianDto
+        {
+            Id = lab.Id,
+            Email = lab.User.Email,
+            FirstName = lab.FirstName,
+            LastName = lab.LastName
+        };
     }
 }
